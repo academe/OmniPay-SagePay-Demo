@@ -1,0 +1,8 @@
+{
+    "require": {
+        "omnipay/sagepay": "~2.0",
+        "league/csv": "^7.1",
+        "symfony/var-dumper": "^2.7",
+        "league/booboo": "^1.0"
+    }
+}

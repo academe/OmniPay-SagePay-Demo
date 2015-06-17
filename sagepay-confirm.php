@@ -24,7 +24,9 @@ if (empty($transaction) || $transaction['finalStatus'] != 'PENDING') {
 }
 
 // Get the gateway driver.
-$gateway = OmniPay::create('SagePay\Server') // Always Server
+// Don't forget to use your own vendor name.
+// Always "Server". "Direct" will never get here.
+$gateway = OmniPay::create('SagePay\Server')
     ->setVendor('academe')
     ->setTestMode(true);
 

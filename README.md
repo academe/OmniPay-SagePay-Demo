@@ -50,6 +50,7 @@ To switch to SagePay Server, a few changes need to be made:
 
 * In authorize.php change `$gateway_server = 'SagePay\Direct';` to `$gateway_server = 'SagePay\Server';`
 * Comment out the credit card details from the `new CreditCar([...])` section.
+* Give the transaction a notification handler URL. This is set as the "returnUrl" in `authorization.php`, which is commented out to start with.
 
 Now try it again. This time you should be redirected to the SagePay site to enter your credit card details and
 to confirm your address. A callback to `sagepay-confirm.php` will be made with the results, and you will

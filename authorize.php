@@ -58,7 +58,7 @@ $card = new CreditCard([
 // switches to the test endpoint URLs.
 
 $gateway = OmniPay::create($gateway_server)
-    ->setVendor('academe')
+    ->setVendor(SagePay::vendor())
     ->setTestMode(true)
     ->setReferrerId('3F7A4119-8671-464F-A091-9E59EB47B80C');
 

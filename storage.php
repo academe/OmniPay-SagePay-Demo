@@ -24,6 +24,22 @@ class URL
     }
 }
 
+// Get the SagePay auth details
+class SagePay
+{
+    protected static $vendor = '';
+
+    public static function vendor()
+    {
+        if (empty(static::$vendor)) {
+            $config = parse_ini_file('.env');
+            static::$vendor = $config['VENDOR'];
+        }
+
+        return static::$vendor;
+    }
+}
+
 /**
  * Table 'transactions' details:
  *

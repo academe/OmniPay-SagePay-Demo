@@ -19,6 +19,10 @@ $transaction = Storage::get($transactionId);
 
 // If we can't find the transaction, or it is in the wrong status,
 // then bail out now.
+// FIXME: I think instead of bailing out like this, we could return 
+// a proper response. Perhaps just make sure we pass in a blank
+// transactionReference before doing the send() and that should
+// catch the post as invalid.
 if (empty($transaction) || $transaction['finalStatus'] != 'PENDING') {
     exit("vendorTxCode missing or invalid - aborting");
 }
@@ -32,7 +36,7 @@ $gateway = OmniPay::create('SagePay\Server')
 
 // Get the "complete purchase" message.
 $requestMessage = $gateway->completePurchase([
-    'transactionId' => $transactionId,
+    'transactionId' => $transactionId, // CHECKME: do we need to pass this in? If so, why? It's in POST data.
     'transactionReference' => $transaction['transactionReference'],
 ]);
 

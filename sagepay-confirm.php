@@ -19,12 +19,15 @@ $transaction = Storage::get($transactionId);
 
 // If we can't find the transaction, or it is in the wrong status,
 // then bail out now.
-// FIXME: I think instead of bailing out like this, we could return 
-// a proper response. Perhaps just make sure we pass in a blank
-// transactionReference before doing the send() and that should
+// FIXED: I think instead of bailing out like this, we could return 
+// a proper response. We do this by setting an empty
+// transactionReference before doing the send(); that will
 // catch the post as invalid.
 if (empty($transaction) || $transaction['finalStatus'] != 'PENDING') {
-    exit("vendorTxCode missing or invalid - aborting");
+    // vendorTxCode missing or invalid - aborting
+    $transactionReference = null;
+} else {
+    $transactionReference = $transaction['transactionReference'];
 }
 
 // Get the gateway driver.
@@ -36,16 +39,19 @@ $gateway = OmniPay::create('SagePay\Server')
 
 // Get the "complete purchase" message.
 $requestMessage = $gateway->completePurchase([
-    'transactionId' => $transactionId, // CHECKME: do we need to pass this in? If so, why? It's in POST data.
-    'transactionReference' => $transaction['transactionReference'],
+    'transactionId' => $transactionId, // Why do we need to pass this in? It's in POST data. Raise a ticket.
+    'transactionReference' => $transactionReference,
 ]);
 
 // Do a "send" - this will validate everything.
 try {
     $responseMessage = $requestMessage->send();
-} catch(InvalidResponseException $e) {
+} catch(\Exception $e) {
+    // InvalidResponseException will not catch a null transactionReference.
+    // You may want to catch them separately and return different error messages.
     // This is a nasty hack, manually creating a message in the
     // event of an exception caused by a security failure.
+
     $requestMessage = $gateway->completePurchase([]);
     $responseMessage = new ServerCompleteAuthorizeResponse($requestMessage, []);
     $responseMessage->invalid($finalUrl, $e->getMessage());

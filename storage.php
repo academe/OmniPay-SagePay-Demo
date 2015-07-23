@@ -11,6 +11,10 @@ $runner = new League\BooBoo\Runner();
 $runner->pushFormatter(new League\BooBoo\Formatter\HtmlTableFormatter());
 $runner->register();
 
+// Register dotenv for config data
+$dotenv = new Dotenv\Dotenv(__DIR__);
+$dotenv->overload();
+
 // Get the current base URL.
 class URL
 {
@@ -21,22 +25,6 @@ class URL
             . "://"
             . $_SERVER['SERVER_NAME']
                 . dirname($_SERVER['REQUEST_URI']);
-    }
-}
-
-// Get the SagePay auth details
-class SagePay
-{
-    protected static $vendor = '';
-
-    public static function vendor()
-    {
-        if (empty(static::$vendor)) {
-            $config = parse_ini_file('.env');
-            static::$vendor = $config['VENDOR'];
-        }
-
-        return static::$vendor;
     }
 }
 
@@ -56,9 +44,6 @@ class SagePay
 
 class Storage {
     protected static $host = 'localhost';
-    protected static $database;
-    protected static $user;
-    protected static $password;
     protected static $table = 'transactions';
     // Columns(id and data)
 
@@ -66,14 +51,12 @@ class Storage {
     {
         static $connection;
 
-        $config = parse_ini_file('.env');
-
-        static::$database = $config['DATABASE'];
-        static::$user = $config['USER'];
-        static::$password = $config['PASSWORD'];
-
         if (empty($connection)) {
-            $connection = new PDO("mysql:host=" . static::$host . ";dbname=" . static::$database . "", static::$user, static::$password);
+            $connection = new PDO(
+                "mysql:host=" . static::$host . ";dbname=" . getenv('DATABASE') . "",
+                getenv('USER'),
+                getenv('PASSWORD')
+            );
 
             $connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         }

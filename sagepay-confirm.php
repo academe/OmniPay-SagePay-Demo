@@ -34,7 +34,7 @@ if (empty($transaction) || $transaction['finalStatus'] != 'PENDING') {
 // Don't forget to use your own vendor name.
 // Always "Server". "Direct" will never get here.
 $gateway = OmniPay::create('SagePay\Server')
-    ->setVendor(SagePay::vendor())
+    ->setVendor(getenv('VENDOR'))
     ->setTestMode(true);
 
 // Get the "complete purchase" message.

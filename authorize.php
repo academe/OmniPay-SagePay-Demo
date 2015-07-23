@@ -15,6 +15,7 @@ use Omnipay\Common\CreditCard;
 // Choose the one you want to use
 $gateway_server = 'SagePay\Direct';
 //$gateway_server = 'SagePay\Server';
+//$gateway_server = 'AuthorizeNet_SIM';
 
 // Transaction ID defined by the merchant site.
 $transactionId = 'phpne-demo-' . rand(10000000, 99999999);
@@ -58,7 +59,7 @@ $card = new CreditCard([
 // switches to the test endpoint URLs.
 
 $gateway = OmniPay::create($gateway_server)
-    ->setVendor(SagePay::vendor())
+    ->setVendor(getenv('VENDOR'))
     ->setTestMode(true)
     ->setReferrerId('3F7A4119-8671-464F-A091-9E59EB47B80C');
 

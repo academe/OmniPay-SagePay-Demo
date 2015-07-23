@@ -3,6 +3,9 @@
 // http://acadweb.co.uk/omnipay-demo/authorize.php
 // VISA 4929000000006
 
+// Header
+include "page.php";
+
 include "vendor/autoload.php";
 include "storage.php";
 
@@ -58,10 +61,19 @@ $card = new CreditCard([
 // We will run the API in test mode, which automatically
 // switches to the test endpoint URLs.
 
-$gateway = OmniPay::create($gateway_server)
-    ->setVendor(getenv('VENDOR'))
-    ->setTestMode(true)
-    ->setReferrerId('3F7A4119-8671-464F-A091-9E59EB47B80C');
+if ($gateway_server == 'SagePay\Direct' || $gateway_server == 'SagePay\Server') {
+    $gateway = OmniPay::create($gateway_server)
+        ->setVendor(getenv('VENDOR'))
+        ->setTestMode(true)
+        ->setReferrerId('3F7A4119-8671-464F-A091-9E59EB47B80C');
+} elseif ($gateway_server == 'AuthorizeNet_SIM' || $gateway_server == 'AuthorizeNet_DPM') {
+    $gateway = OmniPay::create($gateway_server)
+        ->setApiLoginId(getenv('API_LOGIN_ID'))
+        ->setTransactionKey(getenv('TRANSACTION_KEY'))
+        ->setHashSecret(getenv('HASH_SECRET'))
+        ->setTestMode(true)
+        ->setDeveloperMode(true);
+}
 
 // Get the message for the service we want - purchase in this case.
 $requestMessage = $gateway->purchase([
@@ -74,7 +86,10 @@ $requestMessage = $gateway->purchase([
     // No return URL is needed for SagePay\Direct.
     // It will be needed for SagePay\Server - try it with and without
     // to see what happens.
-    //'returnUrl' => URL::directory() . '/sagepay-confirm.php',
+    'returnUrl' => URL::directory() . '/sagepay-confirm.php',
+
+    // A notify URL is needed for Authorize.Net
+    //'notifyUrl' => URL::directory() . '/authorizenet-confirm.php',
 ]);
 
 // Process the service request.
@@ -82,23 +97,22 @@ $requestMessage = $gateway->purchase([
 $responseMessage = $requestMessage->send();
 
 // Store the result.
+// Note here that SagePay has getStatus() while Authorize.Net has getCode(). These all need
+// to be nornalised.
 $transaction = Storage::update($transactionId, [
     'finalStatus' => 'PENDING',
-    'status' => $responseMessage->getStatus(),
+    'status' => method_exists($responseMessage, 'getStatus') ? $responseMessage->getStatus() : $responseMessage->getCode(),
     'message' => 'Awaiting notify',
     'transactionReference' => $responseMessage->getTransactionReference(),
 ]);
 
 if ($responseMessage->isSuccessful()) {
-    echo "<p><strong>All finished and all successful.</strong></p>";
+    echo "<h2 class='alert alert-success'><span class='glyphicon glyphicon-ok-sign'></span><strong>All finished and all successful.</strong></h2>";
     $transaction = Storage::update($transactionId, ['finalStatus' => 'APPROVED']);
     echo "<p>The final stored transaction:</p>";
     dump($transaction);
 
 } elseif ($responseMessage->isRedirect()) {
-    //dump($responseMessage->getData());
-    //echo "<p>Redirecting in ten seconds...<p>";
-    //ob_flush(); flush(); sleep(10);
     // OmniPay provides a POST redirect method for convenience.
     // You will probably want to write your own that fits in
     // better with your framework.
@@ -108,7 +122,7 @@ if ($responseMessage->isSuccessful()) {
 
 
 } else {
-    echo "<p>Some kind of error: <strong>" . $responseMessage->getMessage() . "</strong></p>";
+    echo "<h2 class='alert alert-danger'><span class='glyphicon glyphicon-remove-sign'></span>Some kind of error: <strong>" . $responseMessage->getMessage() . "</strong></h2>";
     $transaction = Storage::update($transactionId, [
         'finalStatus' => 'ERROR',
         'status' => $responseMessage->getStatus(),
@@ -119,4 +133,7 @@ if ($responseMessage->isSuccessful()) {
 
 }
 
-echo '<p><a href="authorize.php">Try again</a></p>';
+echo '<p><a href="authorize.php" class="btn btn-default btn-lg">Try again</a></p>';
+
+// Footer
+include "page.php";

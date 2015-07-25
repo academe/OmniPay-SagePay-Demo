@@ -16,8 +16,8 @@ use Omnipay\Common\CreditCard;
 // redirect involved. SagePay\Server will ask for the user
 // to be redirected to the SagePay site.
 // Choose the one you want to use
-//$gateway_server = 'SagePay\Direct';
-$gateway_server = 'SagePay\Server';
+$gateway_server = 'SagePay\Direct';
+//$gateway_server = 'SagePay\Server';
 //$gateway_server = 'AuthorizeNet_SIM';
 
 // Transaction ID defined by the merchant site.

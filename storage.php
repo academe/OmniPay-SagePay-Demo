@@ -43,7 +43,6 @@ class URL
  */
 
 class Storage {
-    protected static $host = 'localhost';
     protected static $table = 'transactions';
     // Columns(id and data)
 
@@ -53,7 +52,7 @@ class Storage {
 
         if (empty($connection)) {
             $connection = new PDO(
-                "mysql:host=" . static::$host . ";dbname=" . getenv('DATABASE') . "",
+                "mysql:host=" . getenv('HOST') . ";dbname=" . getenv('DATABASE') . "",
                 getenv('USER'),
                 getenv('PASSWORD')
             );

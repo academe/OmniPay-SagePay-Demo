@@ -39,7 +39,7 @@ $gateway = OmniPay::create('SagePay\Server')
 
 // Get the "complete purchase" message.
 $requestMessage = $gateway->completePurchase([
-    'transactionId' => $transactionId, // Why do we need to pass this in? It's in POST data. Raise a ticket.
+    //'transactionId' => $transactionId, // Why do we need to pass this in? It's in POST data. Raise a ticket.
     'transactionReference' => $transactionReference,
 ]);
 
